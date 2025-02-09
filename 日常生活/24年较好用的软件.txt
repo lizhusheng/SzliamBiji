@@ -1,0 +1,5 @@
+浏览器：安卓 via   电脑 Eege和谷歌
+视频播放器： potPlayer
+图片查看：Honeyview
+压缩： Bandzip
+远程软件： Rustdeak 或者 Parsec（远程游戏）
