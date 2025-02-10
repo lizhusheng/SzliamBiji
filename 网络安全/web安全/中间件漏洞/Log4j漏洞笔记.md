@@ -16,19 +16,19 @@
 3. 使用 `logger.info()`, `debug()`, `error()`, `warn()` 等方法记录日志
 
 ### 为什么要用 Log4j
-- 日志级别管理（如生产环境只打印 info 日志，不打印 debug 日志）
-- 不同 package 的打印格式不同
-- 多输出渠道（控制台、文件、数据库）
-- 日志文件管理（文件大小、定时自动清理）
-- 易于集成（Spring、Spring Boot）
+1. 日志级别管理（如生产环境只打印 info 日志，不打印 debug 日志）
+2. 不同 package 的打印格式不同
+3. 多输出渠道（控制台、文件、数据库）
+4. 日志文件管理（文件大小、定时自动清理）
+5. 易于集成（Spring、Spring Boot）
 
 ### Log4j 漏洞时间线
-4. 11 月 24 日，阿里云安全团队陈兆军报告 Log4j RCE 漏洞
-5. 12 月 4 日开始有在野攻击
-6. 12 月 10 日凌晨漏洞细节被公开
-7. 各 SRC 陆续关闭 Log4j 漏洞提交通道
-8. 各安全厂商纷纷通报，发布临时解决办法
-9. Apache 陆续发布 rc1 补丁、rc2 补丁、2.15 正式版
+6. 11 月 24 日，阿里云安全团队陈兆军报告 Log4j RCE 漏洞
+7. 12 月 4 日开始有在野攻击
+8. 12 月 10 日凌晨漏洞细节被公开
+9. 各 SRC 陆续关闭 Log4j 漏洞提交通道
+10. 各安全厂商纷纷通报，发布临时解决办法
+11. Apache 陆续发布 rc1 补丁、rc2 补丁、2.15 正式版
 
 ### 受影响公司
 - 绝大部分互联网公司
@@ -83,8 +83,8 @@
 - 不便于维护
 
 ### 操作
-1. 先去公布资源（`bind` 方法）
-2. 然后别人可以用名字查找资源（`lookup` 方法）
+12. 先去公布资源（`bind` 方法）
+13. 然后别人可以用名字查找资源（`lookup` 方法）
 
 ### 改造 JDBC
 ```java
@@ -113,11 +113,11 @@ spring.datasource.jndi-name=jdbc/exampleDB
 - 例如：`Context` 初始化是 RMI 服务，但 `lookup` 的参数是 LDAP 服务，此时协议会动态转换
 
 ### 2. Naming Reference（命名引用）
-- 不在命名/目录服务本地的一个资源，叫做命名引用
-- 让 JNDI 去请求一个不存在的资源
-- 当 JNDI 客户端在本地 `classpath` 找不到这个类，就去指定的远程地址请求，下载这个类到本地执行    
-示例
-- `Exploit` 定义静态方法块
+14. 不在命名/目录服务本地的一个资源，叫做命名引用
+15. 让 JNDI 去请求一个不存在的资源
+16. 当 JNDI 客户端在本地 `classpath` 找不到这个类，就去指定的远程地址请求，下载这个类到本地执行    
+17. 示例
+18. `Exploit` 定义静态方法块
 
 ### 流程
 ![[Pasted image 20250210170540.png]]
@@ -146,24 +146,31 @@ spring.datasource.jndi-name=jdbc/exampleDB
 - 上传到 HTTP 服务器（Apache、Python SimpleHTTPServer 等）
 
 ### 2. 准备 LDAP 服务器
-- `LDAPRefServer.java`
-- Maven 依赖：`unboundid-ldapsdk`
-- 配置远程代码的 HTTP URL
-- 启动服务，绑定指定端口
+19. `LDAPRefServer.java`
+20. Maven 依赖：`unboundid-ldapsdk`
+21. 配置远程代码的 HTTP URL
+22. 启动服务，绑定指定端口
 
 ### 3. LDAP 客户端（Log4j）
-- Maven 依赖：2.14.1 版本
-- Apache Log4j 2.x <= 2.14.1
-- 打印日志即可，客户端即下载恶意代码并执行
+23. Maven 依赖：2.14.1 版本
+24. Apache Log4j 2.x <= 2.14.1
+25. 打印日志即可，客户端即下载恶意代码并执行
+### 4.
+![[Pasted image 20250210171811.png]]
+
+## Log4j RCE 原理分析
+26. Log4j 支持 JNDI `lookup` 功能
+27. `StrSubstitutor` 的 `resolveVariable()` 方法
+28. `NamingManager` 的 `newInstance` 方法
 
 ## 漏洞影响范围
 - Log4j 2.x <= 2.14.1
 - JDK 小于 8u191、7u201、6u211
 
 ## 漏洞排查
-- pom 版本检查
-- 日志中是否存在 `jndi:ldap://`、`jndi:rmi`、`dnslog.cn`、`ceye.io` 等
-- 是否存在 `JndiLookup`、`ldapURLContext`、`getObjectFactoryFromReference` 调用
+29. pom 版本检查
+30. 日志中是否存在 `jndi:ldap://`、`jndi:rmi`、`dnslog.cn`、`ceye.io` 等
+31. 是否存在 `JndiLookup`、`ldapURLContext`、`getObjectFactoryFromReference` 调用
 
 ### 工具
 - [log4j-local-check.sh](https://static.threatbook.cn/tools/log4j-local-check.sh)
@@ -172,33 +179,30 @@ spring.datasource.jndi-name=jdbc/exampleDB
 ## 漏洞修复
 
 ### 思路
-5. 禁止用户请求参数出现攻击关键字
-6. 禁止 `lookup` 下载远程文件（命名引用）
-7. 禁止 Log4j 的应用连接外网
-8. 禁止 Log4j 使用 `lookup`
-9. 从 Log4j jar 包中删除 `lookup`（2.10 以下）
+32. 禁止用户请求参数出现攻击关键字
+33. 禁止 `lookup` 下载远程文件（命名引用）
+34. 禁止 Log4j 的应用连接外网
+35. 禁止 Log4j 使用 `lookup`
+36. 从 Log4j jar 包中删除 `lookup`（2.10 以下）
 
-### 升级到 2.17.1
-- 默认不再支持二次跳转（命名引用）的方式获取对象
-- 只有在 `log4j2.allowedLdapClasses` 列表中指定的 class 才能获取
-- 只有远程地址是本地地址或者在 `log4j2.allowedLdapHosts` 列表中指定的地址才能获取
+### 升级到 2.17.1-原理
+37. 默认不再支持二次跳转（命名引用）的方式获取对象
+38. 只有在 `log4j2.allowedLdapClasses` 列表中指定的 class 才能获取
+39. 只有远程地址是本地地址或者在 `log4j2.allowedLdapHosts` 列表中指定的地址才能获取
 
 ### 其他方案
-- 升级 JDK
-  - JDK 6u45、7u21 之后：`java.rmi.server.useCodebaseOnly` 默认值为 `true`，禁用自动加载远程类文件
-  - JDK 6u141、7u131、8u121 之后：`com.sun.jndi.rmi.object.trustURLCodebase` 默认为 `false`，禁止 RMI 和 CORBA 协议使用远程 codebase
-  - JDK 6u211、7u201、8u191 之后：`com.sun.jndi.ldap.object.trustURLCodebase` 默认为 `false`，禁止 LDAP 协议使用远程 codebase
+#### - 升级 JDK
+  1. JDK 6u45、7u21 之后：`java.rmi.server.useCodebaseOnly` 默认值为 `true`，禁用自动加载远程类文件
+  2. JDK 6u141、7u131、8u121 之后：`com.sun.jndi.rmi.object.trustURLCodebase` 默认为 `false`，禁止 RMI 和 CORBA 协议使用远程 codebase
+  3. JDK 6u211、7u201、8u191 之后：`com.sun.jndi.ldap.object.trustURLCodebase` 默认为 `false`，禁止 LDAP 协议使用远程 codebase
 
 ### 修改 Log4j 配置
-10. 设置参数：`log4j2.formatMsgNoLookups=True`
-11. 修改 JVM 参数：`-Dlog4j2.formatMsgNoLookups=true`
-12. 系统环境变量：`FORMAT_MESSAGES_PATTERN_DISABLE_LOOKUPS` 设置为 `true`
-13. 禁止 Log4j2 所在服务器外连
+40. 设置参数：`log4j2.formatMsgNoLookups=True`
+41. 修改 JVM 参数：`-Dlog4j2.formatMsgNoLookups=true`
+42. 系统环境变量：`FORMAT_MESSAGES_PATTERN_DISABLE_LOOKUPS` 设置为 `true`
+43. 禁止 Log4j2 所在服务器外连
 
-## Log4j RCE 原理分析
-- Log4j 支持 JNDI `lookup` 功能
-- `StrSubstitutor` 的 `resolveVariable()` 方法
-- `NamingManager` 的 `newInstance` 方法
+
 
 ### 任意命令执行
 - 前端注入点：只要是参数被 Log4j 记录的地方都可以
