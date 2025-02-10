@@ -115,17 +115,24 @@ spring.datasource.jndi-name=jdbc/exampleDB
 ### 2. Naming Reference（命名引用）
 - 不在命名/目录服务本地的一个资源，叫做命名引用
 - 让 JNDI 去请求一个不存在的资源
-- 当 JNDI 客户端在本地 `classpath` 找不到这个类，就去指定的远程地址请求，下载这个类到本地执行
-
-### 示例
+- 当 JNDI 客户端在本地 `classpath` 找不到这个类，就去指定的远程地址请求，下载这个类到本地执行    
+示例
 - `Exploit` 定义静态方法块
 
 ### 流程
-3. `NamingManager` 341 行
-4. `getObjectFactoryFrom...`
+![[Pasted image 20250210170540.png]]
 
-### RMI 资源也可以这样利用，原理一样
+### 为什么会执行远程代码？
+#### NamingManager 341行
+![[Pasted image 20250210170719.png]]
+#### etObjectFactoryFrom..
+![[Pasted image 20250210170758.png]]
 
+### RMI资源也可以这样利用，原理一样
+#### 怎么在外网启动一个LDAP服务？
+	除了本地Java代码，也可以用marshalsec-0.0. 3-SNAPSHOT-all.jar，带参数直接启动
+#### 怎么在外网启动一个HTTP服务？ Apache
+	Apache、Tomcat、Nginx、Phpstudy……
 ## 环境复现
 
 ### 基础环境
